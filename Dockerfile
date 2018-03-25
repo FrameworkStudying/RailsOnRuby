@@ -12,7 +12,11 @@ MAINTAINER Core <hfreedomx@gmail.com>
 # [-y] in apt-get means selecting yes as default when user is enquired in the process of executing command
 # [build-essential] is package which relates compile function in Linux, it is necessary for development in Linux OS
 # [libpq] is package which is the C application programmer's interface to PostgreSQL
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev
+# [nodejs] is package for coffe 
+RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs
+
+# Add [vim] in development environment
+RUN apt-get update -qq && apt-get install -y vim
 
 # Setting a variable, the variable can be loaded by the RUN command below the ENV command
 ENV RAILS_ROOT /kanpo_dna_prototype
@@ -25,7 +29,6 @@ WORKDIR $RAILS_ROOT
 
 # Copying the file to the target path
 COPY Gemfile $RAILS_ROOT/Gemfile
-COPY Gemfile.lock $RAILS_ROOT/Gemfile.lock
 
 # Install the Gem by bundle, the Gemfile contains the Gems list about gems need to be install
 RUN bundle install

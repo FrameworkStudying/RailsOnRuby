@@ -1,0 +1,26 @@
+version: "3"
+# The service list for docker container group
+services:
+  # the service name, you could set it as custom name
+  db_postgres:
+    # just execute the image which image name and tag are corresponding the value
+    image: postgres:10.3
+    volumes:
+      - db-data: /Users/core/Server/datas/data_store/postgres
+
+  app:
+    # the build information for docker run command
+    build:
+      # the path for dockerfile
+      context: .
+      # the name of docker file
+      dockerfile: Dockerfile
+    # the value is the tag information for the image when execute the [docker run] command with Dockerfile
+    # It should be existed with build information
+    image: rails-250-515:1.0
+    volumes:
+      - .:/StudyRailsOnRuby
+    # express dependency between services, it means the services in [depends_on] will be started before the service
+    depends_on:
+      # the dependency services should be defined as a list
+      - db_postgres
