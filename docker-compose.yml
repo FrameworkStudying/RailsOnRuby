@@ -4,11 +4,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    command: bundle exec rails s -p 3000 -b 0.0.0.0
     image: ror-205-515:1.0
     depends_on:
       - db_postgres
     volumes:
       - .:/StudyRailsOnRuby
+    ports:
+      - 3000:3000
 
   db_postgres:
     image: postgres:10.3

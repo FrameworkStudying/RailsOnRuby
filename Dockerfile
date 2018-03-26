@@ -47,4 +47,4 @@ EXPOSE 3000
 # will take effect
 # The [CMD] command will be run when container is started to run
 # [bundle exec rails s] command is start the built-in server in rails
-CMD bundle exec rails s
+#CMD bundle exec rails s
