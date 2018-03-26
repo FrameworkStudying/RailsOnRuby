@@ -1,0 +1,20 @@
+version: "3"
+services:
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ror-205-515:1.0
+    depends_on:
+      - db_postgres
+    volumes:
+      - .:/StudyRailsOnRuby
+
+  db_postgres:
+    image: postgres:10.3
+    volumes:
+      - db_data:/Users/incubit-standard/Server/data/postgres
+
+
+volumes:
+  db_data: {}

@@ -14,8 +14,10 @@ MAINTAINER Core <hfreedomx@gmail.com>
 # [libpq] is package which is the C application programmer's interface to PostgreSQL
 RUN apt-get update -qq && apt-get install -y build-essential libpq-dev
 
+RUN apt-get install -y vim
+
 # Setting a variable, the variable can be loaded by the RUN command below the ENV command
-ENV RAILS_ROOT /kanpo_dna_prototype
+ENV RAILS_ROOT /StudyRailsOnRuby
 
 # You should add a $ mark in front of variable to load it
 RUN mkdir $RAILS_ROOT
@@ -31,7 +33,7 @@ COPY Gemfile.lock $RAILS_ROOT/Gemfile.lock
 RUN bundle install
 
 # Copying all files of current folder to another folder
-COPY . $RAILS_ROOT
+#COPY . $RAILS_ROOT
 
 # set EXPOSE will infroms Docker that the container listens on the specified network ports at runtime
 EXPOSE 3000
