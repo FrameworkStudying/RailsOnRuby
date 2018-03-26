@@ -71,20 +71,20 @@ jobs:
             - vendor/bundle
             - ~/.gem
 
-      - restore_cache:
-          keys:
-            - yarn-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "yarn.lock" }}
-            - yarn-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-
-      - run: yarn check || yarn install
-      - save_cache:
-          key: yarn-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "yarn.lock" }}
-          paths:
-            - node_modules
-            - ~/.cache/yarn
-            - ~/.config/yarn
+      #- restore_cache:
+          #keys:
+            # - yarn-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "yarn.lock" }}
+            # - yarn-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-
+      #- run: yarn check || yarn install
+      #- save_cache:
+          # key: yarn-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "yarn.lock" }}
+          # paths:
+          #   - node_modules
+          #   - ~/.cache/yarn
+          #   - ~/.config/yarn
 
-      - run: dockerize -wait tcp://localhost:5432 -timeout 1m
-      - run: bundle exec rake db:create db:schema:load --trace
+      #- run: dockerize -wait tcp://localhost:5432 -timeout 1m
+      #- run: bundle exec rake db:create db:schema:load --trace
       # - run: bundle exec rake db:migrate --trace
       #- run: bundle exec rspec spec/**/*_spec.rb
 
