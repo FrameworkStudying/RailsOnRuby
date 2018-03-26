@@ -2,73 +2,94 @@
 #
 # Check https://circleci.com/docs/2.0/language-ruby/ for more details
 #
+
+defaults: &defaults
+  docker:
+    - image: circleci/ruby:2.5.0-stretch-node-browsers
+      environment:
+        BUNDLE_PATH: vendor/bundle
+        BUNDLE_JOBS: 3
+        BUNDLE_RETRY: 3
+        PGHOST: 127.0.0.1
+        PGUSER: circleci
+    - image: circleci/postgres:10.3-alpine
+      environment:
+        POSTGRES_USER: circleci
+        POSTGRES_DB: study_rails_on_ruby_test
+        POSTGRES_PASSWORD: ""
+  environment:
+    NODE_ENV: test
+    RAILS_ENV: test
+    RACK_ENV: test
+  working_directory: ~/project
+
 version: 2
-# A run is comprised of one or more named jobs. Jobs are specified in the jobs map.
 jobs:
-  # The job name
-  build:
-    working_directory: ~/StudyRailsOnRuby
-    docker:
-      # specify the version you desire here
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      - image: circleci/ruby:2.5.0-stretch-node-browsers
-        environment:
-          BUNDLE_PATH: vendor/bundle
-          BUNDLE_JOBS: 3
-          BUNDLE_RETRY: 3
-          PGHOST: 127.0.0.1
-          PGUSER: circleci
-          RAILS_ENV: test
-
-      - image: circleci/postgres:10.3-alpine
-        environment:
-          POSTGRES_USER: circleci
-          POSTGRES_DB: study_rails_on_ruby_test
-          POSTGRES_PASSWORD: ""
-
-   
+  test:
+    <<: *defaults
     steps:
       - checkout
+      - run:
+          name: Copy configuration files
+          command: |
+            cp config/circleci/database.ci.yml config/database.yml
+      - run:
+          name: Create required directories
+          command: |
+            mkdir -p tmp
+      - save_cache:
+          key: repo-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/project
 
-      # Download and cache dependencies
+      - run:
+          name: Install packages for test
+          command: |
+            sudo apt-get update
+      - run:
+          name: Avoid unknown hosts for github
+          command: |
+            mkdir -p ~/.ssh/
+            echo -e "Host github.com\n  StrictHostKeyChecking no\n" | tee -a ~/.ssh/config
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "Gemfile.lock" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+            - repo-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_SHA1 }}
+            - repo-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-
 
+      - restore_cache:
+          keys:
+            - bundler-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile.lock" }}
+            - bundler-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-
       - run:
-          name: install dependencies
+          name: gem install bundler
           command: |
-            bundle install --jobs=4 --retry=3 --path vendor/bundle
-
+            gem which bundler | grep 1.16 || gem install bundler --install-dir ${HOME}/.gem/ruby/2.5.0
+      - run: bundle check || bundle install
       - save_cache:
+          key: bundler-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile.lock" }}
           paths:
-            - ./vendor/bundle
-          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
-        
-      # Database setup
-      - run: bundle exec rake db:create
-      - run: bundle exec rake db:schema:load
+            - vendor/bundle
+            - ~/.gem
 
-      # run tests!
-      - run:
-          name: run tests
-          command: |
-            mkdir /tmp/test-results
-            TEST_FILES="$(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)"
-            
-            bundle exec rspec --format progress \
-                            --format RspecJunitFormatter \
-                            --out /tmp/test-results/rspec.xml \
-                            --format progress \
-                            $TEST_FILES
+      - restore_cache:
+          keys:
+            - yarn-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "yarn.lock" }}
+            - yarn-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-
+      - run: yarn check || yarn install
+      - save_cache:
+          key: yarn-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "yarn.lock" }}
+          paths:
+            - node_modules
+            - ~/.cache/yarn
+            - ~/.config/yarn
 
-      # collect reports
-      - store_test_results:
-          path: /tmp/test-results
-      - store_artifacts:
-          path: /tmp/test-results
-          destination: test-results
+      - run: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run: bundle exec rake db:create db:schema:load --trace
+      # - run: bundle exec rake db:migrate --trace
+      #- run: bundle exec rspec spec/**/*_spec.rb
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - test
