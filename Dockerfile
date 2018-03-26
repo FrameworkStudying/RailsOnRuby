@@ -16,6 +16,10 @@ RUN apt-get update -qq && apt-get install -y build-essential libpq-dev
 
 RUN apt-get install -y vim
 
+# in order to fix the error about Rails on Ruby
+# There was an error while trying to load the gem 'uglifier'
+RUN apt-get install -y nodejs
+
 # Setting a variable, the variable can be loaded by the RUN command below the ENV command
 ENV RAILS_ROOT /StudyRailsOnRuby
 
