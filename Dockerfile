@@ -18,8 +18,14 @@ RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs
 # Add [vim] in development environment
 RUN apt-get update -qq && apt-get install -y vim
 
+RUN apt-get install -y vim
+
+# in order to fix the error about Rails on Ruby
+# There was an error while trying to load the gem 'uglifier'
+RUN apt-get install -y nodejs
+
 # Setting a variable, the variable can be loaded by the RUN command below the ENV command
-ENV RAILS_ROOT /kanpo_dna_prototype
+ENV RAILS_ROOT /StudyRailsOnRuby
 
 # You should add a $ mark in front of variable to load it
 RUN mkdir $RAILS_ROOT
@@ -34,7 +40,7 @@ COPY Gemfile $RAILS_ROOT/Gemfile
 RUN bundle install
 
 # Copying all files of current folder to another folder
-COPY . $RAILS_ROOT
+#COPY . $RAILS_ROOT
 
 # set EXPOSE will infroms Docker that the container listens on the specified network ports at runtime
 EXPOSE 3000
@@ -44,4 +50,4 @@ EXPOSE 3000
 # will take effect
 # The [CMD] command will be run when container is started to run
 # [bundle exec rails s] command is start the built-in server in rails
-CMD bundle exec rails s
+#CMD bundle exec rails s
