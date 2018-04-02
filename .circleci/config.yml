@@ -1,95 +1,88 @@
-# Ruby CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-ruby/ for more details
-#
+# Set the CircleCI environment about building environment for Ruby/Postgres
 
-defaults: &defaults
-  docker:
-    - image: circleci/ruby:2.5.0-stretch-node-browsers
-      environment:
-        BUNDLE_PATH: vendor/bundle
-        BUNDLE_JOBS: 3
-        BUNDLE_RETRY: 3
-        PGHOST: 127.0.0.1
-        PGUSER: circleci
-    - image: circleci/postgres:10.3-alpine
-      environment:
-        POSTGRES_USER: circleci
-        POSTGRES_DB: study_rails_on_ruby_test
-        POSTGRES_PASSWORD: ""
-  environment:
-    NODE_ENV: test
-    RAILS_ENV: test
-    RACK_ENV: test
-  working_directory: ~/project
-
+# defining the CircleCI version to be used
 version: 2
+# the jobs key declares the phases in the Build-Test-Deploy process in CircleCI.
 jobs:
-  test:
-    <<: *defaults
+  # the key of job name, you could set it as a customized name
+  # everything else is going to live under the key
+  # the jobs map must contain a job named [build] if the Workflows are not used
+
+  build:
+  # build_project:
+    # if the key is set to N > 1, then N independent executors will be set up and each will run the steps of that job in parallel.
+    parallelism: 3
+    # you could specify a work directory of the job
+    # currently set it as the home directory of project
+    working_directory: ~/StudyRailsOnRuby
+    #the setting of docker container images under a docker key 
+    docker:
+      # setting of the docker image about Docker
+      # using the version of 2.5 and with additional packages installed for NodeJS
+      - image: circleci/ruby:2.5.0-stretch-node-browsers
+        environment:
+          # Ensure proper caching and improve performance and reliability for installing dependencies with Bundler
+          BUNDLE_JOBS: 3
+          BUNDLE_RETRY: 3
+          BUNDLE_PATH: vendor/bundle
+          # the environment variables for Rails on Ruby
+          RAILS_ENV: test
+          # the environment variables for connecting the application container with Postgres database
+          # the variables should be same to the setting of postgres image
+          PGHOST: 127.0.0.1
+          PGUSER: circleci-tester
+      - image: circleci/postgres:10.3-alpine
+        environment:
+          POSTGRES_USER: circleci-tester
+          POSTGRES_DB: study_rails_on_ruby_test
+          POSTGRES_PASSWORD: ""
+    # the steps of one job
     steps:
+      # checkout project code into the working directory
+      # the step is necessary
       - checkout
-      - run:
-          name: Copy configuration files
-          command: |
-            cp config/circleci/database.ci.yml config/database.yml
-      - run:
-          name: Create required directories
-          command: |
-            mkdir -p tmp
-      - save_cache:
-          key: repo-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_SHA1 }}
-          paths:
-            - ~/project
 
-      - run:
-          name: Install packages for test
-          command: |
-            sudo apt-get update
-      - run:
-          name: Avoid unknown hosts for github
-          command: |
-            mkdir -p ~/.ssh/
-            echo -e "Host github.com\n  StrictHostKeyChecking no\n" | tee -a ~/.ssh/config
+      # ------ steps about bundler start ------
+      # Restore bundle cache
+      # pull down the cache if present. it won't do anything if this is your first run or if you have changed Gemfile.lock
+      # Normally you never call this task directly since it's done automatically when it is needed.
       - restore_cache:
           keys:
-            - repo-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ .Environment.CIRCLE_SHA1 }}
-            - repo-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-
+            # checksum will get the index value of Gemfile.lock file
+            - study-rails-on-ruby-bundle-{{ checksum "Gemfile.lock" }}
+            - study-rails-on-ruby-bundle-
 
-      - restore_cache:
-          keys:
-            - bundler-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile.lock" }}
-            - bundler-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-
+      # invoking all command-line program
       - run:
-          name: gem install bundler
-          command: |
-            gem which bundler | grep 1.16 || gem install bundler --install-dir ${HOME}/.gem/ruby/2.5.0
-      - run: bundle check || bundle install
+          # The title of the step to be shown in the CircleCI UI(default full command)
+          name: Checking Bundler
+          # Command to run via the shell
+          command:
+            # get gem list and checkout whether the bundler 1.16 exists, the bundler will be installed in case of the bundler(version) doesn't exist
+            # || means that the right side command will be run in case of return value is false in left side command
+            gem list | grep bundle | grep 1.16 || gem install bundler --install-dir ${HOME}/.gem/ruby/2.5.0
+
+      - run:
+          name: Checking situation of installed gems from Gemfile
+          # Verify if dependencies are satisfied by installed gems from Gemfile, if no, install gems
+          command:
+            # search the local machine for each of the gems requested in the Gemfile.
+            # If all gems are found, bundler prints a success message and exits with a status of 0.
+            # if not, the first missing gem is listed and Bundler exits status 1.
+            bundle check || bundle install
+
+      # Store bundle cache
       - save_cache:
-          key: bundler-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile.lock" }}
+          key: study-rails-on-ruby-bundle-{{ checksum "Gemfile.lock"}}
           paths:
             - vendor/bundle
-            - ~/.gem
+      # ------ steps about bundler end ------
 
-      #- restore_cache:
-          #keys:
-            # - yarn-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "yarn.lock" }}
-            # - yarn-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-
-      #- run: yarn check || yarn install
-      #- save_cache:
-          # key: yarn-cache-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "yarn.lock" }}
-          # paths:
-          #   - node_modules
-          #   - ~/.cache/yarn
-          #   - ~/.config/yarn
+# The setting of CircleCI Workflows
+# workflows:
+#   version: 2
+#   build_and_test:
+#     jobs:
+#       - build_project  
 
-      #- run: dockerize -wait tcp://localhost:5432 -timeout 1m
-      #- run: bundle exec rake db:create db:schema:load --trace
-      # - run: bundle exec rake db:migrate --trace
-      #- run: bundle exec rspec spec/**/*_spec.rb
 
-workflows:
-  version: 2
-  build_and_test:
-    jobs:
-      - test
