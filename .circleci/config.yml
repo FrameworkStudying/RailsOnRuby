@@ -8,8 +8,8 @@ jobs:
   # everything else is going to live under the key
   # the jobs map must contain a job named [build] if the Workflows are not used
 
-  build:
-  # build_project:
+  # build:
+  build_project:
     # if the key is set to N > 1, then N independent executors will be set up and each will run the steps of that job in parallel.
     parallelism: 3
     # you could specify a work directory of the job
@@ -79,10 +79,8 @@ jobs:
       # ------ steps about bundler end ------
 
 # The setting of CircleCI Workflows
-# workflows:
-#   version: 2
-#   build_and_test:
-#     jobs:
-#       - build_project  
-
-
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build_project
