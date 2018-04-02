@@ -64,7 +64,7 @@ jobs:
 
       - run:
           name: Checking situation of installed gems from Gemfile
-          # Verify if dependencies are satisfied by installed gems from Gemfile, if no, install gems
+          # Verify if dependencies are satisfied by installed gems from Gemfile. If no, install gems
           command:
             # search the local machine for each of the gems requested in the Gemfile.
             # If all gems are found, bundler prints a success message and exits with a status of 0.

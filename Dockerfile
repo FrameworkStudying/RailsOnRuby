@@ -24,6 +24,9 @@ RUN apt-get install -y vim
 # There was an error while trying to load the gem 'uglifier'
 RUN apt-get install -y nodejs
 
+# in order to use the Yarn to manage the Javascript library
+RUN apt-get install -y yarn
+
 # Setting a variable, the variable can be loaded by the RUN command below the ENV command
 ENV RAILS_ROOT /StudyRailsOnRuby
 
