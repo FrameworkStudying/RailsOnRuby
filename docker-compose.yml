@@ -5,6 +5,10 @@ services:
   db_postgres:
     # just execute the image which image name and tag are corresponding the value
     image: postgres:10.3
+    # set the connection setting for Postgres
+    environment:
+      POSTGRES_USER: tester
+      POSTGRES_PASSWORD: ""
     volumes:
       - db-data:/Users/core/Server/datas/data_store/postgres
       #- db-data:/Users/incubit-standard/Server/data/postgres
