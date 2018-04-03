@@ -1,4 +1,6 @@
 source 'https://rubygems.org'
+# recommended by Heroku, it means Heroku will load the version of ruby which you define in Gemfile
+ruby '2.5.0'
 
 git_source(:github) do |repo_name|
   repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?("/")
@@ -29,6 +31,9 @@ gem 'jbuilder', '~> 2.5'
 # gem 'redis', '~> 4.0'
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
+
+# Gem for using Test code
+gem 'rspec-rails', '~> 3.7.2'
 
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
