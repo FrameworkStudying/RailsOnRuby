@@ -24,8 +24,6 @@ RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs
 # Add [vim] in development environment
 RUN apt-get update -qq && apt-get install -y vim
 
-RUN apt-get install -y vim
-
 # in order to fix the error about Rails on Ruby
 # There was an error while trying to load the gem 'uglifier'
 RUN apt-get install -y nodejs

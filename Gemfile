@@ -34,6 +34,10 @@ gem 'jbuilder', '~> 2.5'
 
 # Gem for using Test code
 gem 'rspec-rails', '~> 3.7.2'
+# factory method pattern is a creational pattern that uses factory methods to deal with the problem of creating objects without having to specify the exact class of the object that will be created.
+gem 'factory_bot', '~> 4.8', '>= 4.8.2'
+# Faker, a port of Data::Faker from Perl, is used to easily generate fake data: names, addresses, phone numbers, etc.
+gem 'faker', '~> 1.8', '>= 1.8.7'
 
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
