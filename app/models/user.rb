@@ -11,7 +11,7 @@ class User < ApplicationRecord
     end
 
     def isAdmin?
-        if @isAdmin == 1
+        if @isAdministrator == 1
             return true
         else
             return false
