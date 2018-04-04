@@ -77,6 +77,12 @@ jobs:
           paths:
             - vendor/bundle
       # ------ steps about bundler end ------
+      
+      # Run all test code in CircleCI
+      - run:
+          name: Run all test codes
+          command:
+            bundle exec rspec spec
 
 # The setting of CircleCI Workflows
 workflows:
