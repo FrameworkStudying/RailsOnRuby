@@ -20,10 +20,10 @@ default: &default
   # For details on connection pooling, see Rails configuration guide
   # http://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  username: postgres
-  host: db_postgres
-  port: 5432
-  password:
+  username: <%= ENV.fetch("POSTGRES_USER") %>
+  host: <%= ENV.fetch('POSTGRES_HOST') %>
+  port: <%= ENV.fetch('POSTGRES_PORT') %>
+  password: <%= ENV.fetch('POSTGRES_PASSWORD') %>
 
 development:
   <<: *default
@@ -85,5 +85,3 @@ test:
 production:
   <<: *default
   database: StudyRailsOnRuby_production
-  username: StudyRailsOnRuby
-  password: <%= ENV['STUDYRAILSONRUBY_DATABASE_PASSWORD'] %>

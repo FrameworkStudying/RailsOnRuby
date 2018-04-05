@@ -29,13 +29,15 @@ jobs:
           RAILS_ENV: test
           # the environment variables for connecting the application container with Postgres database
           # the variables should be same to the setting of postgres image
-          PGHOST: 127.0.0.1
-          PGUSER: circleci-tester
+          POSTGRES_HOST: 127.0.0.1
+          POSTGRES_USER: circleci-tester
+          POSTGRES_PASSWORD: 111111abcdef
+          POSTGRES_PORT: 5432
       - image: circleci/postgres:10.3-alpine
         environment:
           POSTGRES_USER: circleci-tester
           POSTGRES_DB: study_rails_on_ruby_test
-          POSTGRES_PASSWORD: ""
+          POSTGRES_PASSWORD: 111111abcdef
     # the steps of one job
     steps:
       # checkout project code into the working directory

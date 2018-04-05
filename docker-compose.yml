@@ -7,10 +7,13 @@ services:
     image: postgres:10.3
     # set the connection setting for Postgres
     environment:
+      # you should use [keyword:value] to set the environment variable
       POSTGRES_USER: tester
-      POSTGRES_PASSWORD: ""
+      POSTGRES_PASSWORD: 111111abcdef
+    ports:
+      - 5432:5432
     volumes:
-      - db-data:/Users/core/Server/datas/data_store/postgres
+      - pg-data:/var/lib/postgresql/data
       #- db-data:/Users/incubit-standard/Server/data/postgres
 
   webapp:
@@ -20,6 +23,13 @@ services:
       context: .
       # the name of docker file
       dockerfile: Dockerfile
+    # the environment setting should be set in same level with build
+    environment:
+      RAILS_ENV: development
+      POSTGRES_HOST: db_postgres
+      POSTGRES_USER: tester
+      POSTGRES_PASSWORD: 111111abcdef
+      POSTGRES_PORT: 5432
     
     command: bundle exec rails s -p 3000 -b 0.0.0.0
     # the value is the tag information for the image when execute the [docker run] command with Dockerfile
@@ -35,4 +45,5 @@ services:
       - db_postgres
 
 volumes:
-  db-data: {}
+  pg-data:
+    driver: local
