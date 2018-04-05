@@ -77,6 +77,15 @@ jobs:
           paths:
             - vendor/bundle
       # ------ steps about bundler end ------
+
+
+      # Run the command for setting up Database
+      - run:
+          name: Setting up Database
+          # you could use [ | ] behind the command keyword, then you could run multiple commands
+          command: |
+            bundle exec rake db:create db:schema:load --trace
+            bundle exec rake db:migrate
       
       # Run all test code in CircleCI
       - run:
